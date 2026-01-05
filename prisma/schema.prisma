@@ -1,0 +1,140 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model configuracion {
+  id                String   @id @default(uuid())
+  nombreRestaurante String
+  direccion         String?
+  telefono          String?
+  email             String?
+  logo              String?
+  ruc               String?
+  igv               Float    @default(18.0)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model detalles_pedido {
+  id             String    @id @default(uuid())
+  cantidad       Int
+  precioUnitario Float
+  subtotal       Float
+  observaciones  String?
+  pedidoId       String
+  productoId     String
+  pedidos        pedidos   @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+  productos      productos @relation(fields: [productoId], references: [id])
+}
+
+model detalles_venta {
+  id             String    @id @default(uuid())
+  cantidad       Int
+  precioUnitario Float
+  subtotal       Float
+  ventaId        String
+  productoId     String
+  productos      productos @relation(fields: [productoId], references: [id])
+  ventas         ventas    @relation(fields: [ventaId], references: [id], onDelete: Cascade)
+}
+
+model pedidos {
+  id              String            @id @default(uuid())
+  numeroMesa      Int
+  estado          EstadoPedido      @default(PENDIENTE)
+  total           Float             @default(0)
+  observaciones   String?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  meseroId        String
+  detalles_pedido detalles_pedido[]
+  usuarios        usuarios          @relation(fields: [meseroId], references: [id])
+  ventas          ventas?
+}
+
+model productos {
+  id              String            @id @default(uuid())
+  nombre          String
+  descripcion     String?
+  categoria       String
+  precio          Float
+  cantidad        Int               @default(0)
+  tipo            TipoProducto
+  imagen          String?
+  activo          Boolean           @default(true)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  detalles_pedido detalles_pedido[]
+  detalles_venta  detalles_venta[]
+}
+
+model usuarios {
+  id        String    @id @default(uuid())
+  nombre    String
+  email     String    @unique
+  password  String
+  rol       Rol       @default(MESERO)
+  activo    Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  pedidos   pedidos[]
+  ventas    ventas[]
+}
+
+model ventas {
+  id             String           @id @default(uuid())
+  numeroVenta    Int              @unique @default(autoincrement())
+  total          Float
+  metodoPago     MetodoPago       @default(EFECTIVO)
+  estado         EstadoVenta      @default(COMPLETADA)
+  observaciones  String?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  cajeroId       String
+  pedidoId       String?          @unique
+  detalles_venta detalles_venta[]
+  usuarios       usuarios         @relation(fields: [cajeroId], references: [id])
+  pedidos        pedidos?         @relation(fields: [pedidoId], references: [id])
+}
+
+enum EstadoPedido {
+  PENDIENTE
+  EN_PREPARACION
+  LISTO
+  ENTREGADO
+  CANCELADO
+}
+
+enum EstadoVenta {
+  COMPLETADA
+  CANCELADA
+  PENDIENTE
+}
+
+enum MetodoPago {
+  EFECTIVO
+  TARJETA
+  TRANSFERENCIA
+  YAPE
+  PLIN
+}
+
+enum Rol {
+  CAJERO
+  MESERO
+  ADMINISTRADOR
+  COCINA
+  BEBIDAS
+}
+
+enum TipoProducto {
+  BEBIDA
+  PLATO
+  ENTRADA
+  POSTRE
+}
