@@ -33,10 +33,10 @@ const dashboardRoutes = require('./routes/dashboard.routes');
 
 const app = express();
 
-// Configuración de CORS - Permitir todos los orígenes para Vercel
+// Configuración de CORS - Permitir solo el origen del frontend
 app.use(cors({
-  origin: '*',
-  credentials: false,
+  origin: 'https://criollos-phi.vercel.app',
+  credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
   exposedHeaders: ['Content-Range', 'X-Content-Range'],
@@ -46,7 +46,7 @@ app.use(cors({
 
 // Middleware adicional para asegurar headers CORS
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Origin', 'https://criollos-phi.vercel.app');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept');
   res.header('Access-Control-Max-Age', '86400');
