@@ -1,4 +1,4 @@
-# Guía de Optimización - CriolloS Backend
+# Guía de Optimización - CriolloS Backend (MySQL/TiDB)
 
 ## Cambios Realizados
 
@@ -10,13 +10,13 @@
 
 **Después:** 2 queries máximo
 - 1 query para obtener todos los pedidos
-- 1 query para obtener todos los detalles de una vez usando `ANY()`
+- 1 query para obtener todos los detalles de una vez usando `IN()`
 
 **Impacto:** Reducción de 50x en número de queries para listas grandes
 
 #### Problema: Múltiples queries en `actualizarEstado`
 **Antes:** 3 queries (verificación + actualización + lectura)
-**Después:** 1 query usando `RETURNING`
+**Después:** 1 query usando `LAST_INSERT_ID()`
 
 **Impacto:** 3x más rápido en cambios de estado
 
